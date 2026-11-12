@@ -1,8 +1,6 @@
-// SSR/hydration-safety lint. Run automatically by the platform after each build:
-//   yarn eslint -c eslint.ssr.config.mjs .
-// Catches the error class behind most Next.js hydration failures. Do NOT delete or
-// weaken this file to silence errors — fix the flagged code (see components/client-only.tsx
-// and components/safe-format.tsx for ready-made safe patterns).
+// SSR/hydration-safety lint. Run manually:
+//   eslint -c eslint.ssr.config.mjs .
+// Catches the error class behind most Next.js hydration failures.
 import tsParser from '@typescript-eslint/parser'
 
 const BROWSER_GLOBALS = new Set(['window', 'document', 'localStorage', 'sessionStorage', 'navigator'])

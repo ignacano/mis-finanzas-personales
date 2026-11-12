@@ -27,9 +27,6 @@ data/
 *.db
 *.sqlite
 
-# Overrides locales
-next.config.user.json
-
 # Logs / SO / editor
 *.log
 .DS_Store

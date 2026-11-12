@@ -1,0 +1,39 @@
+# Dependencias
+node_modules/
+.yarn/
+.pnp.*
+
+# Build / caché
+.next/
+.build/
+out/
+dist/
+*.tsbuildinfo
+
+# Variables de entorno y credenciales
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Datos personales (planillas, exports, backups, bases locales)
+data/
+*.xlsx
+*.xls
+*.csv
+*.sql
+*.dump
+*.db
+*.sqlite
+
+# Overrides locales
+next.config.user.json
+
+# Logs / SO / editor
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/

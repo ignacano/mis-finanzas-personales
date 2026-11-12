@@ -1,0 +1,247 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/finanzas_app/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+  expenses       Expense[]
+  goals          SavingGoal[]
+  investments    Investment[]
+  cryptoHoldings CryptoHolding[]
+  inventoryItems InventoryItem[]
+  vehicles       Vehicle[]
+  categories     Category[]
+  debts          Debt[]
+  settings       AppSettings[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// App Settings (exchange rates, etc.)
+model AppSettings {
+  id              String   @id @default(cuid())
+  dolarUSD        Float    @default(1400)
+  dolarAuto       Boolean  @default(true)
+  primaryCurrency String   @default("ARS")
+  displayName     String   @default("")
+  monthlyIncome   Float    @default(0)
+  entities        String[] @default(["BBVA Francés", "Banco Provincia", "Banco Credicoop", "Banco Patagonia"])
+  paymentMethods  String[] @default(["Efectivo", "Débito Automático", "Crédito Automático"])
+  inventoryCategories String[] @default(["Hardware", "Electrodomésticos", "Instrumentos musicales"])
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Expense categories
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  color     String    @default("#10b981")
+  icon      String    @default("receipt")
+  createdAt DateTime  @default(now())
+  expenses  Expense[]
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Expenses / Services / Taxes
+model Expense {
+  id            String   @id @default(cuid())
+  name          String
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  amountARS     Float    @default(0)
+  amountUSD     Float    @default(0)
+  exchangeRate  Float    @default(0)
+  date          DateTime
+  dueDate       DateTime?
+  status        String   @default("pendiente") // pendiente, pagado, vencido, parcial, cancelado, programado
+  periodicity   String   @default("unico") // unico, mensual, bimestral, trimestral, anual
+  paymentMethod String?
+  entity        String?
+  dayOfMonth    Int?     // día de pago para gastos recurrentes
+  endDate       DateTime? // vencimiento: hasta cuándo se repite un gasto recurrente (null = indefinido)
+  notes         String?
+  vehicleId     String?
+  vehicle       Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  // Cuotas: un gasto en cuotas genera N filas agrupadas por installmentGroup
+  installmentGroup  String?
+  installmentNumber Int?
+  installmentTotal  Int?
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Savings goals
+model SavingGoal {
+  id            String   @id @default(cuid())
+  name          String
+  targetAmount  Float
+  currentAmount Float    @default(0)
+  currency      String   @default("ARS")
+  deadline      DateTime?
+  description   String?
+  status        String   @default("activo") // activo, cumplido, cancelado
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Deudas por cobrar (dinero que a uno le deben)
+model Debt {
+  id           String    @id @default(cuid())
+  debtor       String    // quién te debe
+  amount       Float
+  currency     String    @default("ARS")
+  expectedDate DateTime? // fecha de cobro estimada
+  notes        String?
+  status       String    @default("pendiente") // pendiente, cobrado
+  userId       String?
+  user         User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+// Investments
+model Investment {
+  id                String    @id @default(cuid())
+  name              String
+  type              String    // plazo_fijo, fci, acciones, bonos, otro
+  amountInvested    Float
+  currency          String    @default("ARS")
+  startDate         DateTime
+  endDate           DateTime?
+  estimatedReturn   Float?    @default(0)
+  actualReturn      Float?    @default(0)
+  entity            String?
+  status            String    @default("activo") // activo, vencido, cancelado
+  notes             String?
+  userId            String?
+  user              User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+// Crypto holdings
+model CryptoHolding {
+  id            String   @id @default(cuid())
+  name          String   // Bitcoin, Ethereum, etc.
+  ticker        String   // BTC, ETH, etc.
+  quantity      Float
+  avgBuyPrice   Float    @default(0)
+  notes         String?
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Inventory items
+model InventoryItem {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  category      String?
+  valueARS      Float    @default(0)
+  valueUSD      Float    @default(0)
+  acquiredDate  DateTime?
+  condition     String   @default("bueno") // bueno, regular, malo
+  notes         String?
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Vehicles
+model Vehicle {
+  id            String    @id @default(cuid())
+  brand         String
+  model         String
+  year          Int
+  plate         String?
+  estimatedValue Float   @default(0)
+  estimatedValueUSD Float @default(0)
+  valueCurrency String    @default("ARS")
+  purchaseDate  DateTime?
+  mileage       Int       @default(0)
+  status        String    @default("activo")
+  notes         String?
+  expenses      Expense[]
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+}

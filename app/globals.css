@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --background: 222 47% 5%;
+    --foreground: 210 40% 96%;
+    --card: 222 44% 11%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 44% 11%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 160 84% 42%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 217 33% 18%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 63%;
+    --accent: 217 33% 19%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 10%;
+    --border: 216 26% 26%;
+    --input: 216 26% 26%;
+    --ring: 160 84% 42%;
+    --radius: 1rem;
+    --chart-1: 160 84% 39%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 47 96% 53%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 12 76% 61%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+    min-height: 100vh;
+  }
+  /* Ambient premium background glows — gives depth so the glass panels read */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(58rem 58rem at 8% -12%, hsl(160 84% 32% / 0.16), transparent 58%),
+      radial-gradient(52rem 52rem at 102% -4%, hsl(199 89% 46% / 0.12), transparent 55%),
+      radial-gradient(48rem 48rem at 50% 118%, hsl(262 83% 56% / 0.10), transparent 60%);
+  }
+}
+
+@layer utilities {
+  /* Glassmorphism applied globally: every card / panel / table / modal / sidebar
+     in the app uses `.bg-card`, so this gives the whole UI a cohesive frosted look. */
+  .bg-card {
+    background-color: hsl(222 42% 12% / 0.55) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(155%);
+    backdrop-filter: blur(22px) saturate(155%);
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.06),
+      0 10px 34px -20px rgba(0, 0, 0, 0.9);
+  }
+  .bg-popover {
+    background-color: hsl(222 42% 12% / 0.72) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(155%);
+    backdrop-filter: blur(22px) saturate(155%);
+  }
+  /* Softer, more premium corners across the app */
+  .rounded-xl {
+    border-radius: 1.15rem;
+  }
+  .rounded-lg {
+    border-radius: 0.85rem;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(215 20% 40% / 0.5);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.7);
+}
